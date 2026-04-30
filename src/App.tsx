@@ -1,149 +1,118 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "swiper/css";
 import "swiper/css/effect-creative";
 import "swiper/css/pagination";
 import "swiper/css/free-mode";
 import "swiper/css/thumbs";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { EffectCreative, Autoplay, Pagination, FreeMode, Thumbs } from "swiper/modules";
+import { EffectCreative, Autoplay, FreeMode, Thumbs } from "swiper/modules";
 import { motion, AnimatePresence } from "framer-motion";
 import "./App.css";
+import Login from "./Login";
+import AdminDashboard from "./AdminDashboard";
 
-const foodItems = [
-  { name: " Senin 19 April 2026", src: "WhatsApp Image 2026-04-02 at 06.36.48.jpeg", energi: "320 kcal", protein: "24g", lemak: "12g", karbohidrat: "35g", serat: "4g", menu: ["Nasi Putih", "Ayam Suwir", "Tumis Buncis Wortel", "Telur Balado"] },
-  { name: " Selasa 20 April 2026", src: "WhatsApp Image 2026-04-07 at 06.16.10.jpeg", energi: "450 kcal", protein: "30g", lemak: "18g", karbohidrat: "42g", serat: "6g", menu: ["Nasi Kuning", "Ayam Goreng", "Perkedel", "Sambal Goreng Ati"] },
-  { name: " Rabu 21 April 2026", src: "WhatsApp Image 2026-04-10 at 06.53.40.jpeg", energi: "280 kcal", protein: "15g", lemak: "8g", karbohidrat: "40g", serat: "10g", menu: ["Nasi Uduk", "Telur Dadar", "Tempe Orek", "Bihun Goreng"] },
-  { name: " Kamis 22 April 2026", src: "WhatsApp Image 2026-04-11 at 07.20.22.jpeg", energi: "510 kcal", protein: "35g", lemak: "22g", karbohidrat: "45g", serat: "3g", menu: ["Nasi Goreng", "Telur Mata Sapi", "Acar", "Kerupuk Udang"] },
-  { name: " Jumat 23 April 2026", src: "WhatsApp Image 2026-04-14 at 06.52.16.jpeg", energi: "390 kcal", protein: "28g", lemak: "15g", karbohidrat: "38g", serat: "5g", menu: ["Nasi Liwet", "Ikan Teri", "Tahu Goreng", "Sayur Asem"] },
-  { name: " Sabtu 24 April 2026", src: "WhatsApp Image 2026-04-15 at 06.38.04.jpeg", energi: "420 kcal", protein: "20g", lemak: "16g", karbohidrat: "50g", serat: "8g", menu: ["Nasi Merah", "Ayam Bakar", "Lalapan", "Sambal Terasi"] },
-  { name: " Minggu 25 April 2026", src: "WhatsApp Image 2026-01-19 at 06.18.44.jpeg", energi: "340 kcal", protein: "18g", lemak: "14g", karbohidrat: "30g", serat: "7g", menu: ["Nasi Kebuli", "Daging Kambing", "Acar Nanas", "Emping"] },
-  { name: " Senin 26 April 2026", src: "WhatsApp Image 2026-01-22 at 06.25.13.jpeg", energi: "480 kcal", protein: "32g", lemak: "20g", karbohidrat: "40g", serat: "2g", menu: ["Nasi Rames", "Rendang Daging", "Daun Singkong", "Gulai Nangka"] },
-  { name: " Selasa 27 April 2026", src: "WhatsApp Image 2026-01-28 at 06.49.52.jpeg", energi: "310 kcal", protein: "22g", lemak: "10g", karbohidrat: "28g", serat: "6g", menu: ["Nasi Pecel", "Sayuran Rebus", "Peyek Kacang", "Bumbu Kacang"] },
-  { name: " Rabu 28 April 2026", src: "WhatsApp Image 2026-01-30 at 06.30.41.jpeg", energi: "400 kcal", protein: "25g", lemak: "18g", karbohidrat: "32g", serat: "5g", menu: ["Nasi Campur", "Sate Lilit", "Lawar", "Sambal Matah"] },
-  { name: " Kamis 29 April 2026", src: "WhatsApp Image 2026-01-29 at 08.22.28 (1).jpeg", energi: "350 kcal", protein: "20g", lemak: "12g", karbohidrat: "38g", serat: "4g", menu: ["Nasi Putih", "Ayam Kecap", "Tumis Sawi", "Bakwan Jagung"] },
-  { name: " Jumat 30 April 2026", src: "WhatsApp Image 2026-01-29 at 08.22.28.jpeg", energi: "420 kcal", protein: "28g", lemak: "15g", karbohidrat: "45g", serat: "5g", menu: ["Nasi Kebuli", "Daging Sapi", "Acar Kuning", "Kerupuk"] },
-  { name: " Sabtu 01 Mei 2026", src: "WhatsApp Image 2026-02-02 at 07.36.26.jpeg", energi: "380 kcal", protein: "22g", lemak: "14g", karbohidrat: "40g", serat: "6g", menu: ["Nasi Liwet", "Ayam Goreng", "Lalapan", "Sambal Dadak"] },
-  { name: " Minggu 02 Mei 2026", src: "WhatsApp Image 2026-02-03 at 06.13.06.jpeg", energi: "410 kcal", protein: "24g", lemak: "16g", karbohidrat: "35g", serat: "7g", menu: ["Nasi Kuning", "Empal Gentong", "Perkedel", "Sambal"] },
-  { name: " Senin 03 Mei 2026", src: "WhatsApp Image 2026-02-04 at 08.14.47.jpeg", energi: "390 kcal", protein: "26g", lemak: "12g", karbohidrat: "42g", serat: "4g", menu: ["Nasi Putih", "Ikan Goreng", "Sayur Sop", "Tempe Goreng"] },
-  { name: " Selasa 04 Mei 2026", src: "WhatsApp Image 2026-02-05 at 08.04.22.jpeg", energi: "440 kcal", protein: "30g", lemak: "18g", karbohidrat: "30g", serat: "5g", menu: ["Nasi Rames", "Opor Ayam", "Sambal Goreng Kentang", "Telur Rebus"] },
-  { name: " Rabu 05 Mei 2026", src: "WhatsApp Image 2026-02-06 at 11.08.37.jpeg", energi: "320 kcal", protein: "18g", lemak: "10g", karbohidrat: "40g", serat: "8g", menu: ["Nasi Merah", "Pepes Ikan", "Urap Sayur", "Tahu Bacem"] },
-  { name: " Kamis 06 Mei 2026", src: "WhatsApp Image 2026-02-09 at 06.31.15.jpeg", energi: "460 kcal", protein: "32g", lemak: "20g", karbohidrat: "38g", serat: "3g", menu: ["Nasi Goreng Spesial", "Sosis", "Nugget", "Telur Ceplok"] },
-  { name: " Jumat 07 Mei 2026", src: "WhatsApp Image 2026-02-11 at 07.05.24.jpeg", energi: "370 kcal", protein: "20g", lemak: "14g", karbohidrat: "42g", serat: "6g", menu: ["Nasi Uduk", "Semur Jengkol", "Teri Kacang", "Emping"] },
-  { name: " Sabtu 08 Mei 2026", src: "WhatsApp Image 2026-02-12 at 06.52.30.jpeg", energi: "400 kcal", protein: "25g", lemak: "15g", karbohidrat: "36g", serat: "5g", menu: ["Nasi Campur", "Sate Ayam", "Sayur Lodeh", "Sambal"] },
-  { name: " Minggu 09 Mei 2026", src: "WhatsApp Image 2026-02-13 at 05.46.34.jpeg", energi: "430 kcal", protein: "28g", lemak: "18g", karbohidrat: "40g", serat: "4g", menu: ["Nasi Putih", "Rendang Daging", "Sayur Kapau", "Sambal Hijau"] },
-];
+interface SliderData {
+  id: number;
+  name: string;
+  menu_date: string;
+  formatted_date: string;
+  image_url: string;
+  energi: string;
+  protein: string;
+  lemak: string;
+  karbohidrat: string;
+  serat: string;
+  menu: string[];
+}
 
-export default function App() {
+function SliderDisplay() {
+  const [foodItems, setFoodItems] = useState<SliderData[]>([]);
+  const [activeVideo, setActiveVideo] = useState<string>("");
+  const [isYouTubeVideo, setIsYouTubeVideo] = useState(false);
   const [thumbsSwiper, setThumbsSwiper] = useState(null as any);
   const [activeIndex, setActiveIndex] = useState(0);
   const [time, setTime] = useState(new Date());
+  const [loading, setLoading] = useState(true);
+
+  // Helper function to convert YouTube URL to embed URL
+  const getYouTubeEmbedUrl = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}?autoplay=1&mute=1&loop=1&playlist=${match[2]}` : url;
+  };
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [sliderRes, videoRes] = await Promise.all([
+          axios.get("http://localhost:8000/api/sliders?all=true"),
+          axios.get("http://localhost:8000/api/videos/active")
+        ]);
+        setFoodItems(sliderRes.data);
+        const videoUrl = videoRes.data.video_url;
+        setActiveVideo(videoUrl);
+        setIsYouTubeVideo(videoUrl && videoUrl.includes('youtube.com'));
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
   const timeString = time.toLocaleTimeString('id-ID', { hour: "2-digit", minute: "2-digit", second: "2-digit" }).replace(/\./g, ":");
   const dateString = time.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  if (loading) return <div className="loading" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', color: '#fff', fontSize: '24px' }}>Mempersiapkan Menu...</div>;
+  if (foodItems.length === 0) return <div className="no-data">Data slider tidak ditemukan.</div>;
+
   const activeFood = foodItems[activeIndex] || foodItems[0];
 
   return (
     <div className="app-container">
-      {/* Header */}
-      <motion.header
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="header"
-      >
+      <motion.header initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="header">
         <div className="header-brand">
           <div className="brand-icon">
-            <img src="/favicon/favicon.svg" alt="SPPG Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <img src="/favicon/favicon.svg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <div className="brand-name">SPPG GARUT SAMARANG SAMARANG</div>
         </div>
-
-        {/* <div className="header-nav">
-          <button className="nav-btn">
-            <img src="/favicon/favicon.svg" alt="Home" className="nav-icon" />
-            <span>Home</span>
-          </button>
-          <button className="nav-btn">
-            <img src="/favicon/favicon.svg" alt="Menu" className="nav-icon" />
-            <span>Menu</span>
-          </button>
-          <button className="nav-btn">
-            <img src="/favicon/favicon.svg" alt="Contact" className="nav-icon" />
-            <span>Info</span>
-          </button>
-        </div> */}
-
-
       </motion.header>
 
-      {/* Main Layout */}
       <div className="main-content">
-
-        {/* Left Panel */}
-        <motion.aside
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="panel-left"
-        >
-          {/* <div className="panel-header">
-            <div className="panel-label">MENU</div>
-            <h1 className="panel-title">{activeFood.name}</h1>
-          </div> */}
+        <motion.aside initial={{ x: -100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="panel-left">
           <div className="detail-content">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeIndex}
-                initial={{ opacity: 0, x: -20, filter: "blur(4px)" }}
-                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, x: 20, filter: "blur(4px)" }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.5 }}
                 className="detail-animated-wrapper"
               >
-                <h2 style={{
-                  fontFamily: 'Impact, sans-serif',
-                  fontSize: '28px', // Slightly smaller for better balance
-                  color: 'var(--text-primary)',
-                  marginBottom: '16px',
-                  textTransform: 'uppercase',
-                  borderBottom: '2px solid rgba(0,0,0,0.05)',
-                  paddingBottom: '10px',
-                  letterSpacing: '1px',
-                  lineHeight: '1.2'
-                }}>
-                  {activeFood.name}
-                </h2>
+                <h2 style={{ fontFamily: 'Impact, sans-serif', fontSize: '28px', textTransform: 'uppercase' }}>{activeFood.formatted_date || activeFood.name}</h2>
                 <div className="detail-section">
-                  <h3>Nutrition Facts</h3>
+                  <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '5px' }}>Nutrition Facts</h3>
                   <div className="nutrition-grid" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                      <span>Energi:</span> <strong style={{ color: 'var(--primary)' }}>{activeFood.energi}</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                      <span>Protein:</span> <strong style={{ color: 'var(--primary)' }}>{activeFood.protein}</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                      <span>Lemak:</span> <strong style={{ color: 'var(--primary)' }}>{activeFood.lemak}</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                      <span>Karbohidrat:</span> <strong style={{ color: 'var(--primary)' }}>{activeFood.karbohidrat}</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                      <span>Serat:</span> <strong style={{ color: 'var(--primary)' }}>{activeFood.serat}</strong>
-                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Energi:</span> <strong style={{ color: 'var(--primary)' }}>{activeFood.energi}</strong></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Protein:</span> <strong style={{ color: 'var(--primary)' }}>{activeFood.protein}</strong></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Lemak:</span> <strong style={{ color: 'var(--primary)' }}>{activeFood.lemak}</strong></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Karbohidrat:</span> <strong style={{ color: 'var(--primary)' }}>{activeFood.karbohidrat}</strong></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Serat:</span> <strong style={{ color: 'var(--primary)' }}>{activeFood.serat}</strong></div>
                   </div>
                 </div>
-
                 <div className="detail-section" style={{ marginTop: '20px' }}>
-                  <h3 className="text-black font-bold mb-3 uppercase tracking-wider text-xs">Detail Menu</h3>
-                  <div className="detail-tags" style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-start' }}>
-                    {activeFood.menu.map((menuItem, idx) => (
-                      <span key={idx} className="tag neon-tag !text-black !font-bold">
+                  <h3 style={{ textTransform: 'uppercase', fontSize: '12px', fontWeight: 'bold' }}>Detail Menu</h3>
+                  <div className="detail-tags" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+                    {activeFood.menu && activeFood.menu.map((menuItem, idx) => (
+                      <span key={idx} className="tag neon-tag" style={{ background: 'rgba(0,0,0,0.05)', padding: '8px 12px', borderRadius: '8px', fontWeight: 'bold', border: '1px solid #ddd' }}>
                         {idx + 1}. {menuItem}
                       </span>
                     ))}
@@ -154,126 +123,88 @@ export default function App() {
           </div>
         </motion.aside>
 
-        {/* Center Panel (3D Bounce/Creative) */}
-        <motion.section
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-          className="panel-center"
-        >
+        <motion.section className="panel-center">
           <div className="coverflow-container">
             <Swiper
-              onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+              onSlideChange={(s) => setActiveIndex(s.realIndex)}
               effect="creative"
               grabCursor={true}
-              loop={true}
+              loop={foodItems.length > 1}
               autoplay={{ delay: 5000, disableOnInteraction: false }}
-              speed={1000}
-              creativeEffect={{
-                prev: {
-                  translate: ["-100%", 0, -400],
-                  rotate: [0, 45, 0],
-                  scale: 0.8,
-                  opacity: 0,
-                },
-                next: {
-                  translate: ["100%", 0, -400],
-                  rotate: [0, -45, 0],
-                  scale: 0.8,
-                  opacity: 0,
-                },
-              }}
               thumbs={{ swiper: thumbsSwiper }}
               modules={[EffectCreative, Autoplay, FreeMode, Thumbs]}
               className="mySwiper"
+              speed={1000}
+              creativeEffect={{
+                prev: { translate: ["-120%", 0, -500], rotate: [0, 0, -20], opacity: 0 },
+                next: { translate: ["120%", 0, -500], rotate: [0, 0, 20], opacity: 0 },
+              }}
             >
               {foodItems.map((item, idx) => (
                 <SwiperSlide key={idx} className="swiper-slide">
-                  <img src={`/${item.src}`} alt={item.name} className="slide-image-contain" />
+                  <img src={item.image_url} alt={item.name} className="slide-image-contain" />
                 </SwiperSlide>
               ))}
             </Swiper>
           </div>
         </motion.section>
 
-        {/* Video Kitchen Panel (New 4th Container) */}
-        <motion.section
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="panel-video"
-        >
+        <motion.section className="panel-video">
           <div className="video-card">
             <div className="video-card-header">
-              <div className="live-badge">
-                <span className="dot"></span>
-                LIVE KITCHEN
-              </div>
+              <div className="live-badge"><span className="dot"></span>LIVE KITCHEN</div>
               <h4>Cooking Process</h4>
             </div>
             <div className="video-wrapper">
-              <video
-                src="/masak.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="aesthetic-video-panel"
-              ></video>
+              {isYouTubeVideo ? (
+                <iframe
+                  key={activeVideo}
+                  src={getYouTubeEmbedUrl(activeVideo)}
+                  className="aesthetic-video-panel"
+                  style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  key={activeVideo}
+                  src={activeVideo || "/masak.mp4"}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="aesthetic-video-panel"
+                  style={{ pointerEvents: 'none' }}
+                ></video>
+              )}
             </div>
-            {/* <div className="video-info">
-              <p>Proses memasak di dapur SPPG</p>
-            </div> */}
           </div>
         </motion.section>
 
-        {/* Right Panel */}
-        <motion.aside
-          initial={{ x: 100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
-          className="panel-right"
-        >
-          <div className="time-section">
-            <div className="current-time-wrapper">
-              <AnimatePresence mode="popLayout">
-                <motion.div
-                  key={timeString}
-                  initial={{ y: 20, opacity: 0, filter: "blur(4px)" }}
-                  animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                  exit={{ y: -20, opacity: 0, filter: "blur(4px)" }}
-                  transition={{ duration: 0.4 }}
-                  className="current-time"
-                  style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center' }}
-                >
-                  {timeString} <span style={{ marginLeft: '10px', color: 'var(--text-secondary)', fontWeight: 'bold', fontSize: '18px' }}>WIB</span>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-            <div className="current-date">{dateString}</div>
-            {/* <div className="promo-badge">Live Promo</div> */}
+        <motion.aside className="panel-right" initial={{ x: 100, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
+          <div className="time-section" style={{ textAlign: 'center', background: 'white', padding: '20px', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
+            <div className="current-time" style={{ fontSize: '48px', fontWeight: '900', color: '#2b3674' }}>{timeString}</div>
+            <div className="current-date" style={{ fontSize: '14px', fontWeight: 'bold', color: '#a3aed0', textTransform: 'uppercase', letterSpacing: '1px' }}>{dateString}</div>
           </div>
 
-          <div className="right-gallery">
-            <div className="right-gallery-title">GALERI MENU SPPG</div>
+          <div className="right-gallery" style={{ marginTop: '20px' }}>
+            <div className="right-gallery-title" style={{ fontSize: '14px', fontWeight: '900', marginBottom: '15px' }}>GALERI MENU SPPG</div>
             <div className="right-gallery-slider">
               <Swiper
                 direction="vertical"
-                slidesPerView="auto"
+                slidesPerView={3}
                 spaceBetween={12}
-                loop={true}
-                autoplay={{ delay: 3000, disableOnInteraction: false }}
-                speed={800}
+                loop={foodItems.length > 3}
+                autoplay={{ delay: 3000 }}
                 modules={[Autoplay]}
                 className="vertical-swiper"
+                style={{ height: '350px' }}
               >
                 {foodItems.map((item, idx) => (
                   <SwiperSlide key={idx} className="vertical-slide">
-                    <div className="mini-card">
-                      <img src={`/${item.src}`} alt={item.name} />
-                      <div className="mini-card-overlay">
-                        <span>{item.name}</span>
-                      </div>
+                    <div className="mini-card" style={{ cursor: 'pointer' }} onClick={() => setActiveIndex(idx)}>
+                      <img src={item.image_url} alt={item.name} />
+                      <div className="mini-card-overlay"><span>{item.name}</span></div>
                     </div>
                   </SwiperSlide>
                 ))}
@@ -283,36 +214,36 @@ export default function App() {
         </motion.aside>
       </div>
 
-      {/* Bottom Slider (Continuous Infinity) */}
-      <motion.div
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
-        className="bottom-slider"
-      >
-        <div className="slider-label">Gallery</div>
+      <motion.div className="bottom-slider" initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
         <Swiper
-          onSwiper={setThumbsSwiper}
+          // onSwiper={setThumbsSwiper}
           spaceBetween={16}
           slidesPerView="auto"
-          loop={true}
-          autoplay={{
-            delay: 0,
-            disableOnInteraction: false,
-          }}
+          loop={foodItems.length > 5}
+          autoplay={{ delay: 0, disableOnInteraction: false }}
           speed={5000}
-          grabCursor={true}
-          modules={[Thumbs, Autoplay]}
+          modules={[Autoplay, Thumbs, FreeMode]}
           className="bottom-swiper continuous-slider"
         >
           {foodItems.map((item, idx) => (
-            <SwiperSlide key={idx} className="swiper-slide">
-              <img src={`/${item.src}`} alt={item.name} />
-              <div className="slide-number">0{idx + 1}</div>
+            <SwiperSlide key={idx} className="swiper-slide" style={{ width: '150px' }}>
+              <img src={item.image_url} alt={item.name} style={{ borderRadius: '12px' }} />
             </SwiperSlide>
           ))}
         </Swiper>
       </motion.div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<SliderDisplay />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+      </Routes>
+    </Router>
   );
 }
